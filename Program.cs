@@ -22,7 +22,7 @@ if (string.IsNullOrWhiteSpace(connectionString))
     Console.WriteLine("================================");
 }
 else
-{
+{ 
     try
     {
         var factory = new ConnectionFactory
