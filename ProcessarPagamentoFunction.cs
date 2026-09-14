@@ -1,7 +1,5 @@
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Extensions.Logging;
 using NotificationsFunction.Event;
-using RabbitMQ.Client.Events;
 using System.Text.Json;
 
 namespace NotificationsFunction;
@@ -9,7 +7,6 @@ namespace NotificationsFunction;
 public class ProcessarPagamentoFunction
 {
     private readonly ILogger _logger;
-    private const string QueueConnectionSetting = "RabbitMQConnection";
 
     public ProcessarPagamentoFunction(ILoggerFactory loggerFactory)
     {
@@ -17,8 +14,10 @@ public class ProcessarPagamentoFunction
     }
 
     [Function("ProcessarPagamentoFunction")]
-    public void Run([RabbitMQTrigger("payment-processed", ConnectionStringSetting = QueueConnectionSetting)] string message)
+    public void Run([ServiceBusTrigger("payment-processed", Connection = "ServiceBusConnection")]  string message)
     {
+        _logger.LogInformation("Mensagem recebida: {Message}", message);
+
         var payment = JsonSerializer.Deserialize<PaymentProcessedEvent>(message);
 
         if (payment == null)
@@ -29,13 +28,11 @@ public class ProcessarPagamentoFunction
 
         if (payment.Status == "Aprovado")
         {
-            _logger.LogInformation(
-                "[EMAIL] Compra aprovada com sucesso!");
+            _logger.LogInformation("[EMAIL] Compra aprovada com sucesso!");
         }
         else
         {
-            _logger.LogInformation(
-                "[EMAIL] Compra não aprovada!");
+            _logger.LogInformation("[EMAIL] Compra não aprovada!");
         }
     }
 }
