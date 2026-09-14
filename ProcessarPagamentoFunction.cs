@@ -17,9 +17,9 @@ public class ProcessarPagamentoFunction
     }
 
     [Function("ProcessarPagamentoFunction")]
-    public void Run([RabbitMQTrigger("payment-processed", ConnectionStringSetting = QueueConnectionSetting)] BasicDeliverEventArgs message )
+    public void Run([RabbitMQTrigger("payment-processed", ConnectionStringSetting = QueueConnectionSetting)] string message)
     {
-        var payment = JsonSerializer.Deserialize<PaymentProcessedEvent>(message.Body.ToArray());
+        var payment = JsonSerializer.Deserialize<PaymentProcessedEvent>(message);
 
         if (payment == null)
         {
