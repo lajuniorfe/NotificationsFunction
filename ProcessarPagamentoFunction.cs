@@ -1,3 +1,4 @@
+
 using Microsoft.Azure.Functions.Worker;
 using NotificationsFunction.Event;
 using System.Text.Json;
@@ -14,25 +15,33 @@ public class ProcessarPagamentoFunction
     }
 
     [Function("ProcessarPagamentoFunction")]
-    public void Run([ServiceBusTrigger("payment-processed", Connection = "ServiceBusConnection")]  string message)
+    public void Run([RabbitMQTrigger("payment-processed", ConnectionStringSetting = "RabbitMQConnection" )] string message)
     {
-        _logger.LogInformation("Mensagem recebida: {Message}", message);
+        _logger.LogInformation(
+            "Mensagem recebida: {Message}",
+            message);
 
-        var payment = JsonSerializer.Deserialize<PaymentProcessedEvent>(message);
+        var payment =
+            JsonSerializer.Deserialize<PaymentProcessedEvent>(message);
 
         if (payment == null)
         {
-            _logger.LogWarning("Mensagem inválida recebida.");
+            _logger.LogWarning(
+                "Mensagem inválida recebida.");
+
             return;
         }
 
         if (payment.Status == "Aprovado")
         {
-            _logger.LogInformation("[EMAIL] Compra aprovada com sucesso!");
+            _logger.LogInformation(
+                "[EMAIL] Compra aprovada com sucesso!");
         }
         else
         {
-            _logger.LogInformation("[EMAIL] Compra não aprovada!");
+            _logger.LogInformation(
+                "[EMAIL] Compra não aprovada!");
         }
     }
 }
+
